@@ -23,7 +23,7 @@ rule target:
 
 rule shortstack_pooled:
     input:
-        reads=expand("results/merged_srna/{sample}.merged.fastq.gz", sample=wt_samples),
+        reads=expand("data/merged_srna/{sample}.merged.fastq.gz", sample=wt_samples),
         genome="data/genome/JN3.fasta",
     output:
         "results/shortstack/de_novo/Results.txt",
