@@ -1,66 +1,71 @@
 #!/usr/bin/env python3
 
-fastp      = "docker://quay.io/biocontainers/fastp:1.0.1--heae3180_0"
-bowtie1    = "docker://quay.io/biocontainers/shortstack:4.1.2--hdfd78af_0"
+fastp = "docker://quay.io/biocontainers/fastp:1.0.1--heae3180_0"
 shortstack = "docker://quay.io/biocontainers/shortstack:4.1.2--hdfd78af_0"
 
 wt_samples = [
-    "D5-5-1", "D5-5-2", "D5-5-3",
-    "D5-6-1", "D5-6-2", "D5-6-3",
-    "D5-7-1", "D5-7-2", "D5-7-3",
+    "D5-5-1",
+    "D5-5-2",
+    "D5-5-3",
+    "D5-6-1",
+    "D5-6-2",
+    "D5-6-3",
+    "D5-7-1",
+    "D5-7-2",
+    "D5-7-3",
 ]
+
 
 rule target:
     input:
-        "results/shortstack/wildtype_pooled/Results.txt"
+        "results/shortstack/de_novo/Results.txt",
 
-rule bowtie_index:
-    input:
-        fasta = "data/genome/JN3.fasta"
-    output:
-        idx = multiext("data/bowtie_index", ".1.ebwt", ".2.ebwt", ".3.ebwt",
-                       ".4.ebwt", ".rev.1.ebwt", ".rev.2.ebwt")
-    container:
-        bowtie1
-    shell:
-        "bowtie-build {input.fasta} data/bowtie_index"
 
 rule shortstack_pooled:
     input:
-        reads = expand("data/fastp/merged/{sample}.merged.fastq.gz", sample=wt_samples),
-        index = rules.bowtie_index.output.idx
+        reads=expand("results/merged_srna/{sample}.merged.fastq.gz", sample=wt_samples),
+        genome="data/genome/JN3.fasta",
     output:
-        "results/shortstack/wildtype_pooled/Results.txt"
-    threads: 8
+        "results/shortstack/de_novo/Results.txt",
+    threads: 16
+    resources:
+        mem_mb=32000,
+        runtime=240,
     container:
         shortstack
     shell:
         """
+        rm -rf results/shortstack/de_novo
         ShortStack --readfile {input.reads} \
-                   --bowtie_index data/bowtie_index \
-                   --outdir results/shortstack/wildtype_pooled \
+                   --genomefile {input.genome} \
+                   --outdir results/shortstack/de_novo \
                    --threads {threads} \
+                   --dn_mirna \
                    --mmap u
-        """ 
+        """
+
 
 rule fastp:
     input:
-        r1 = "data/fastp/{sample}_R1.fastqsanger.gz",
-        r2 = "data/fastp/{sample}_R2.fastqsanger.gz"
+        r1="raw_data_srna/links/{sample}_R1.fastqsanger.gz",
+        r2="raw_data_srna/links/{sample}_R2.fastqsanger.gz",
     output:
-        merged = "data/fastp/merged/{sample}.merged.fastq.gz",
-        html   = "data/fastp/merged/{sample}_fastp.html",
-        json   = "data/fastp/merged/{sample}_fastp.json"
-    threads: 4
+        fastq_gz="data/merged_srna/{sample}.merged.fastq.gz",
+        html="data/merged_srna/{sample}_fastp.html",
+        json="data/merged_srna/{sample}_fastp.json",
+    threads: 8
+    resources:
+        mem_mb=16000,
+        runtime=60,
     container:
         fastp
     shell:
         """
         fastp -i {input.r1} -I {input.r2} \
-              --merge --merged_out {output.merged} \
+              --merge --merged_out {output.fastq_gz} \
               --detect_adapter_for_pe \
-              --length_required 18 \
-              --length_limit 30 \
+              --disable_quality_filtering \
+              --disable_length_filtering \
               --thread {threads} \
               --html {output.html} --json {output.json}
         """
