@@ -47,8 +47,8 @@ rule shortstack_pooled:
 
 rule fastp:
     input:
-        r1="raw_data_srna/links/{sample}_R1.fastqsanger.gz",
-        r2="raw_data_srna/links/{sample}_R2.fastqsanger.gz",
+        r1="raw_data_srna/links/{sample}_R1.fastq.gz",
+        r2="raw_data_srna/links/{sample}_R2.fastq.gz",
     output:
         fastq_gz="data/merged_srna/{sample}.merged.fastq.gz",
         html="data/merged_srna/{sample}_fastp.html",
