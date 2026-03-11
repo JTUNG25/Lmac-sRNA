@@ -25,8 +25,8 @@ rule fastp:
         fastp -i {input.r1} -I {input.r2} \
               --merge --merged_out {output.merged} \
               --detect_adapter_for_pe \
-              --length_required 18 \
-              --length_limit 30 \
+              --disable_quality_filtering \
+              --disable_length_filtering \
               --thread {threads} \
               --html {output.html} --json {output.json}
         """
