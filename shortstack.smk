@@ -14,7 +14,6 @@ mutant_samples = [s for s in all_samples if not s.startswith("D5") and not s.sta
 
 rule target:
     input:
-        "results/shortstack/wt/Results.txt",
         expand("results/shortstack/mutants/{sample}/Results.txt", sample=mutant_samples)
 
 rule shortstack_locifile:
