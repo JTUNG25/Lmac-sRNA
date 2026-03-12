@@ -74,7 +74,7 @@ rule fastp:
     threads: 8
     resources:
         mem_mb = 16000,
-        runtime = 30,
+        runtime = 60,
     container:
         fastp
     shell:
