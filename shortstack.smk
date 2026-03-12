@@ -10,11 +10,11 @@ wt_samples = [
 ]
 
 all_samples, = glob_wildcards("raw_data_srna/links/{sample}_R1.fastq.gz")
-mutant_samples = [s for s in all_samples if not s.startswith("D5") and not s.startswith("RNA")]
+all_samples = [s for s in all_samples if not s.startswith("RNA")]
 
 rule target:
     input:
-        expand("results/shortstack/mutants/{sample}/Results.txt", sample=mutant_samples)
+        expand("results/shortstack/mutants/{sample}/Results.txt", sample=all_samples)
 
 rule shortstack_locifile:
     input:
@@ -26,7 +26,7 @@ rule shortstack_locifile:
     threads: 8
     resources:
         mem_mb  = 16000,
-        runtime = 120
+        runtime = 60
     container:
         shortstack
     shell:
@@ -49,7 +49,7 @@ rule shortstack_pooled:
     threads: 16
     resources:
         mem_mb  = 32000,
-        runtime = 120,
+        runtime = 60,
     container:
         shortstack
     shell:
@@ -74,7 +74,7 @@ rule fastp:
     threads: 8
     resources:
         mem_mb = 16000,
-        runtime = 60,
+        runtime = 30,
     container:
         fastp
     shell:
