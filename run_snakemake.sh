@@ -2,8 +2,8 @@
 #SBATCH --account=a_qaafi_chs
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2
-#SBATCH --mem=16GB
-#SBATCH --time=02:00:00
+#SBATCH --mem=8GB
+#SBATCH --time=24:00:00
 #SBATCH --job-name=shortstack_test
 #SBATCH --output=sm.log
 

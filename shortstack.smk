@@ -26,7 +26,7 @@ rule shortstack_locifile:
     threads: 8
     resources:
         mem_mb  = 16000,
-        runtime = 60
+        runtime = 120
     container:
         shortstack
     shell:
@@ -74,7 +74,7 @@ rule fastp:
     threads: 8
     resources:
         mem_mb = 16000,
-        runtime = 60,
+        runtime = 120,
     container:
         fastp
     shell:
