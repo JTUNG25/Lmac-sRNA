@@ -2,7 +2,7 @@
 
 targetfinder = "docker://quay.io/biocontainers/targetfinder:1.7--0"
 
-SCORE_CUTOFF = 4.0
+SCORE_CUTOFF = 5.0
 TARGET_DB    = "data/genome/JN3_transcript_clean.fa"
 TEST_SAMPLES = ["D1_top50", "A3_top50", "R1_top50"]
 
