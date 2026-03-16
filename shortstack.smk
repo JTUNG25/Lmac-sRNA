@@ -83,7 +83,8 @@ rule fastp:
               --merge --merged_out {output.fastq_gz} \
               --detect_adapter_for_pe \
               --disable_quality_filtering \
-              --disable_length_filtering \
+              --length_required 18 \     
+              --length_limit 30 \ 
               --thread {threads} \
               --html {output.html} --json {output.json}
         """
