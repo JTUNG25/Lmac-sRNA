@@ -10,5 +10,6 @@
 source /sw/local/rocky8/noarch/rcc/software/miniforge/24.11.3-0/etc/profile.d/conda.sh
 conda activate snakemake8
 cd /QRISdata/Q9140/lmac/lmac_srna
-
-snakemake -s shortstack.smk --profile profiles/bunya/ --use-singularity
+export TMPDIR=$HOME/tmp
+mkdir -p $TMPDIR
+snakemake -s shortstack.smk --profile profiles/bunya/
