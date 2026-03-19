@@ -12,4 +12,4 @@ conda activate snakemake8
 cd /QRISdata/Q9140/lmac/lmac_srna
 export TMPDIR=$HOME/tmp
 mkdir -p $TMPDIR
-snakemake -s tf_test.smk --profile profiles/bunya/ --use-singularity
+snakemake -s tf_test.smk --profile profiles/bunya/
