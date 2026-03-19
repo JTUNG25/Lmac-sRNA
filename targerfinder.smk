@@ -42,6 +42,7 @@ rule targetfinder:
             -q "$SRNA_NAME" \
             -c {SCORE_CUTOFF} \
             -p $FMT \
+            -r \
             > {output}
         """
 

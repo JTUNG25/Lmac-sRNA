@@ -81,6 +81,7 @@ rule targetfinder:
                             -q "$SRNA_NAME" \
                             -c {params.score} \
                             -p $FMT \
+                            -r \
                             >> results/tf/{wildcards.sample}_targets.$FMT \
                             2>> {log}
                     done
