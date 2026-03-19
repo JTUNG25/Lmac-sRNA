@@ -2,8 +2,8 @@
 
 targetfinder = "docker://quay.io/biocontainers/targetfinder:1.7--0"
 
-SCORE_CUTOFF = 5.0
-TARGET_DB    = "data/genome/JN3_transcript_clean.fa"
+SCORE_CUTOFF = 4.0
+TARGET_DB    = "data/genome/JN3.fasta"
 TEST_SAMPLES = ["D1_top50", "D2-2_top50", "D2-3_top50", "D2-4_top50",
 "A1-1_top50", "A1-2_top50", "A1-3_top50", "A3_top50",
 "R1_top50", "R2-2_top50", "R2-3_top50", "R2-4_top50", "R2-5_top50"]
@@ -33,8 +33,8 @@ rule targetfinder:
         score = SCORE_CUTOFF,
     threads: 1
     resources:
-        mem_mb  = 4000,
-        runtime = 60,
+        mem_mb  = 32000,
+        runtime = 240,
     container:
         targetfinder
     log:
@@ -104,6 +104,7 @@ rule targetfinder:
                     -q "$SRNA_NAME" \
                     -c {params.score} \
                     -p $FMT \
+                    -r \
                     >> results/tf/{wildcards.sample}_targets.$FMT \
                     2>> {log}
             done
