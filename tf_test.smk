@@ -12,23 +12,23 @@ TEST_SAMPLES = ["D1_top50", "D2-2_top50", "D2-3_top50", "D2-4_top50",
 rule target:
     input:
         expand(
-            "results/test/{sample}_targets.{fmt}",
+            "results/tf/{sample}_targets.{fmt}",
             sample=TEST_SAMPLES,
             fmt=["table", "gff", "json"],
         ),
-        expand("results/test/{sample}_diagnostics.txt", sample=TEST_SAMPLES),
-        "results/test/hit_summary.txt",
-        "results/test/workflow_diagnostics.txt",
+        expand("results/tf/{sample}_diagnostics.txt", sample=TEST_SAMPLES),
+        "results/tf/hit_summary.txt",
+        "results/tf/workflow_diagnostics.txt",
 
 
 rule targetfinder:
     input:
-        srna_fa = "target_finder/individual/{sample}.fasta",
+        srna_fa = "data/shortstack_seq/individual/{sample}.fasta",
         db      = TARGET_DB,
     output:
-        table = "results/test/{sample}_targets.table",
-        gff   = "results/test/{sample}_targets.gff",
-        json  = "results/test/{sample}_targets.json",
+        table = "results/tf/{sample}_targets.table",
+        gff   = "results/tf/{sample}_targets.gff",
+        json  = "results/tf/{sample}_targets.json",
     params:
         score = SCORE_CUTOFF,
     threads: 1
@@ -62,7 +62,7 @@ rule targetfinder:
 
         # Initialise empty output files
         for FMT in table gff json; do
-            > results/test/{wildcards.sample}_targets.$FMT
+            > results/tf/{wildcards.sample}_targets.$FMT
         done
 
         # Process one sequence at a time from the multi-FASTA
@@ -81,7 +81,7 @@ rule targetfinder:
                             -q "$SRNA_NAME" \
                             -c {params.score} \
                             -p $FMT \
-                            >> results/test/{wildcards.sample}_targets.$FMT \
+                            >> results/tf/{wildcards.sample}_targets.$FMT \
                             2>> {log}
                     done
                 fi
@@ -103,25 +103,25 @@ rule targetfinder:
                     -q "$SRNA_NAME" \
                     -c {params.score} \
                     -p $FMT \
-                    >> results/test/{wildcards.sample}_targets.$FMT \
+                    >> results/tf/{wildcards.sample}_targets.$FMT \
                     2>> {log}
             done
         fi
 
         echo "" >> {log}
         echo "End time: $(date)" >> {log}
-        echo "Table hits: $(grep -vc '^#' results/test/{wildcards.sample}_targets.table || echo 0)" >> {log}
+        echo "Table hits: $(grep -vc '^#' results/tf/{wildcards.sample}_targets.table || echo 0)" >> {log}
         echo "Status: SUCCESS" >> {log}
         """
 
 
 rule diagnose_sample:
     input:
-        srna_fa = "target_finder/individual/{sample}.fasta",
-        table   = "results/test/{sample}_targets.table",
+        srna_fa = "data/shortstack_seq/individual/{sample}.fasta",
+        table   = "results/tf/{sample}_targets.table",
         log     = "logs/targetfinder/{sample}.log",
     output:
-        diagnostics = "results/test/{sample}_diagnostics.txt",
+        diagnostics = "results/tf/{sample}_diagnostics.txt",
     run:
         with open(output.diagnostics, "w") as out:
             out.write("=" * 60 + "\n")
@@ -196,10 +196,10 @@ rule diagnose_sample:
 
 rule summarise_hits:
     input:
-        tables = expand("results/test/{sample}_targets.table", sample=TEST_SAMPLES),
-        diags  = expand("results/test/{sample}_diagnostics.txt", sample=TEST_SAMPLES),
+        tables = expand("results/tf/{sample}_targets.table", sample=TEST_SAMPLES),
+        diags  = expand("results/tf/{sample}_diagnostics.txt", sample=TEST_SAMPLES),
     output:
-        summary = "results/test/hit_summary.txt",
+        summary = "results/tf/hit_summary.txt",
     run:
         with open(output.summary, "w") as out:
             out.write("=" * 60 + "\n")
@@ -252,10 +252,10 @@ rule summarise_hits:
 
 rule workflow_diagnostics:
     input:
-        tables = expand("results/test/{sample}_targets.table", sample=TEST_SAMPLES),
+        tables = expand("results/tf/{sample}_targets.table", sample=TEST_SAMPLES),
         logs   = expand("logs/targetfinder/{sample}.log", sample=TEST_SAMPLES),
     output:
-        wf_diag = "results/test/workflow_diagnostics.txt",
+        wf_diag = "results/tf/workflow_diagnostics.txt",
     run:
         with open(output.wf_diag, "w") as out:
             out.write("=" * 70 + "\n")
