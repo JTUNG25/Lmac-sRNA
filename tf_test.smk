@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-targetfinder = "docker pull quay.io/biocontainers/targetfinder:1.7--3"
+targetfinder = "docker://quay.io/biocontainers/targetfinder:1.7--3"
 
 SCORE_CUTOFF = 4.0
 TARGET_DB = "data/genome/JN3_transcript_clean.fa"
