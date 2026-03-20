@@ -47,7 +47,6 @@ rule targetfinder:
         echo "Input FASTA: {input.srna_fa}" >> {log}
         echo "Database: {input.db}" >> {log}
         echo "Score cutoff: {params.score}" >> {log}
-        echo "Start time: $(date)" >> {log}
         echo "" >> {log}
 
         # Check input file
@@ -68,23 +67,47 @@ rule targetfinder:
         # Process one sequence at a time from the multi-FASTA
         SRNA_NAME=""
         SRNA_SEQ=""
-
+        PROCESSED_COUNT=0
+        ERROR_COUNT=0
+ 
         while IFS= read -r line || [[ -n "$line" ]]; do
             if [[ "$line" == ">"* ]]; then
                 # Flush the previous sequence through TargetFinder
                 if [[ -n "$SRNA_NAME" && -n "$SRNA_SEQ" ]]; then
                     echo "Processing: $SRNA_NAME" >> {log}
+                    echo "  Sequence: $SRNA_SEQ" >> {log}
+                    echo "  Sequence length: ${{#SRNA_SEQ}}" >> {log}
+                    
+                    # Check for valid RNA sequence (should contain U, not T)
+                    if [[ "$SRNA_SEQ" =~ [^AUCG] ]]; then
+                        echo "  WARNING: Sequence contains non-standard RNA nucleotides" >> {log}
+                    fi
+                    
+                    PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
+                    
                     for FMT in table gff json; do
+                        echo "  Running TargetFinder for format: $FMT" >> {log}
                         targetfinder.pl \
                             -s "$SRNA_SEQ" \
                             -d {input.db} \
                             -q "$SRNA_NAME" \
                             -c {params.score} \
                             -p $FMT \
+                            -t 1 \
                             -r \
                             >> results/tf/{wildcards.sample}_targets.$FMT \
                             2>> {log}
+                        
+                        RETVAL=$?
+                        echo "  TargetFinder exit code for $SRNA_NAME ($FMT): $RETVAL" >> {log}
+                        if [ $RETVAL -ne 0 ]; then
+                            echo "  ERROR: TargetFinder failed for $SRNA_NAME ($FMT)" >> {log}
+                            ERROR_COUNT=$((ERROR_COUNT + 1))
+                        else
+                            echo "  SUCCESS: TargetFinder completed for $SRNA_NAME ($FMT)" >> {log}
+                        fi
                     done
+                    echo "" >> {log}
                 fi
                 # Start buffering the next sequence
                 SRNA_NAME="${{line:1}}"
@@ -97,6 +120,9 @@ rule targetfinder:
         # Flush the final sequence (not caught by the loop above)
         if [[ -n "$SRNA_NAME" && -n "$SRNA_SEQ" ]]; then
             echo "Processing: $SRNA_NAME" >> {log}
+            echo "  Sequence: $SRNA_SEQ" >> {log}
+            echo "  Sequence length: ${{#SRNA_SEQ}}" >> {log}
+            
             for FMT in table gff json; do
                 targetfinder.pl \
                     -s "$SRNA_SEQ" \
@@ -104,16 +130,13 @@ rule targetfinder:
                     -q "$SRNA_NAME" \
                     -c {params.score} \
                     -p $FMT \
+                    -t 1 \
                     -r \
                     >> results/tf/{wildcards.sample}_targets.$FMT \
                     2>> {log}
             done
         fi
 
-        echo "" >> {log}
-        echo "End time: $(date)" >> {log}
-        echo "Table hits: $(grep -vc '^#' results/tf/{wildcards.sample}_targets.table || echo 0)" >> {log}
-        echo "Status: SUCCESS" >> {log}
         """
 
 
