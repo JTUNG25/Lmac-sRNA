@@ -106,6 +106,8 @@ rule targetfinder:
                             -c {params.score} \
                             -p $FMT \
                             -t 1 \
+                            -f \
+                            -u 25 \
                             -r \
                             >> results/tf/{wildcards.sample}_targets.$FMT \
                             2>> {log}
@@ -143,6 +145,8 @@ rule targetfinder:
                     -c {params.score} \
                     -p $FMT \
                     -t 1 \
+                    -f \
+                    -u 25 \
                     -r \
                     >> results/tf/{wildcards.sample}_targets.$FMT \
                     2>> {log}
