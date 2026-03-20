@@ -3,10 +3,22 @@
 targetfinder = "docker://quay.io/biocontainers/targetfinder:1.7--0"
 
 SCORE_CUTOFF = 4.0
-TARGET_DB    = "data/genome/JN3.fasta"
-TEST_SAMPLES = ["D1_top50", "D2-2_top50", "D2-3_top50", "D2-4_top50",
-"A1-1_top50", "A1-2_top50", "A1-3_top50", "A3_top50",
-"R1_top50", "R2-2_top50", "R2-3_top50", "R2-4_top50", "R2-5_top50"]
+TARGET_DB = "data/genome/JN3.fasta"
+TEST_SAMPLES = [
+    "D1_top50",
+    "D2-2_top50",
+    "D2-3_top50",
+    "D2-4_top50",
+    "A1-1_top50",
+    "A1-2_top50",
+    "A1-3_top50",
+    "A3_top50",
+    "R1_top50",
+    "R2-2_top50",
+    "R2-3_top50",
+    "R2-4_top50",
+    "R2-5_top50",
+]
 
 
 rule target:
@@ -23,18 +35,18 @@ rule target:
 
 rule targetfinder:
     input:
-        srna_fa = "data/shortstack_seq/individual/{sample}.fasta",
-        db      = TARGET_DB,
+        srna_fa="data/shortstack_seq/individual/{sample}.fasta",
+        db=TARGET_DB,
     output:
-        table = "results/tf/{sample}_targets.table",
-        gff   = "results/tf/{sample}_targets.gff",
-        json  = "results/tf/{sample}_targets.json",
+        table="results/tf/{sample}_targets.table",
+        gff="results/tf/{sample}_targets.gff",
+        json="results/tf/{sample}_targets.json",
     params:
-        score = SCORE_CUTOFF,
+        score=SCORE_CUTOFF,
     threads: 1
     resources:
-        mem_mb  = 32000,
-        runtime = 240,
+        mem_mb=32000,
+        runtime=240,
     container:
         targetfinder
     log:
@@ -142,11 +154,11 @@ rule targetfinder:
 
 rule diagnose_sample:
     input:
-        srna_fa = "data/shortstack_seq/individual/{sample}.fasta",
-        table   = "results/tf/{sample}_targets.table",
-        log     = "logs/targetfinder/{sample}.log",
+        srna_fa="data/shortstack_seq/individual/{sample}.fasta",
+        table="results/tf/{sample}_targets.table",
+        log="logs/targetfinder/{sample}.log",
     output:
-        diagnostics = "results/tf/{sample}_diagnostics.txt",
+        diagnostics="results/tf/{sample}_diagnostics.txt",
     run:
         with open(output.diagnostics, "w") as out:
             out.write("=" * 60 + "\n")
@@ -156,7 +168,9 @@ rule diagnose_sample:
             with open(input.srna_fa) as f:
                 srna_lines = f.readlines()
                 srna_count = sum(1 for l in srna_lines if l.startswith(">"))
-                seq_count  = sum(1 for l in srna_lines if not l.startswith(">") and l.strip())
+                seq_count = sum(
+                    1 for l in srna_lines if not l.startswith(">") and l.strip()
+                )
 
             out.write("INPUT STATISTICS:\n")
             out.write("-" * 60 + "\n")
@@ -175,7 +189,7 @@ rule diagnose_sample:
             out.write(f"Total table lines      : {len(table_lines)}\n")
             out.write(f"Data lines (hits)      : {len(data_lines)}\n\n")
 
-            scores  = []
+            scores = []
             targets = []
             for line in data_lines:
                 parts = line.split("\t")
@@ -191,18 +205,24 @@ rule diagnose_sample:
             if scores:
                 out.write(f"Total predictions: {len(scores)}\n")
                 out.write(f"Score range      : {min(scores):.2f} - {max(scores):.2f}\n")
-                out.write(f"Mean score       : {sum(scores)/len(scores):.2f}\n")
-                out.write(f"Median score     : {sorted(scores)[len(scores)//2]:.2f}\n\n")
+                out.write(f"Mean score       : {sum(scores)/ len(scores):.2f}\n")
+                out.write(
+                    f"Median score     : {sorted(scores)[len(scores)//2]:.2f}\n\n"
+                )
                 out.write("SCORE DISTRIBUTION:\n")
                 for threshold in [1.0, 2.0, 3.0, 4.0]:
                     count = sum(1 for s in scores if s <= threshold)
-                    pct   = (count / len(scores)) * 100
-                    out.write(f"  <= {threshold:.1f}: {count:4d} predictions ({pct:5.1f}%)\n")
+                    pct = (count / len(scores)) * 100
+                    out.write(
+                        f"  <= {threshold:.1f}: {count:4d} predictions ({pct:5.1f}%)\n"
+                    )
                 out.write("\nTOP 5 PREDICTIONS:\n")
                 for i, (score, target) in enumerate(
                     sorted(zip(scores, targets), key=lambda x: x[0])[:5]
                 ):
-                    out.write(f"  {i+1}. Score: {score:.2f} - Target: {target[0] if target else 'N/A'}\n")
+                    out.write(
+                        f"  {i+1}. Score: {score:.2f} - Target: {target[0] if target else 'N/A'}\n"
+                    )
             else:
                 out.write("NO PREDICTIONS FOUND\n")
                 out.write("  - Score cutoff may be too strict\n")
@@ -221,10 +241,10 @@ rule diagnose_sample:
 
 rule summarise_hits:
     input:
-        tables = expand("results/tf/{sample}_targets.table", sample=TEST_SAMPLES),
-        diags  = expand("results/tf/{sample}_diagnostics.txt", sample=TEST_SAMPLES),
+        tables=expand("results/tf/{sample}_targets.table", sample=TEST_SAMPLES),
+        diags=expand("results/tf/{sample}_diagnostics.txt", sample=TEST_SAMPLES),
     output:
-        summary = "results/tf/hit_summary.txt",
+        summary="results/tf/hit_summary.txt",
     run:
         with open(output.summary, "w") as out:
             out.write("=" * 60 + "\n")
@@ -253,8 +273,10 @@ rule summarise_hits:
                 out.write(f"{sample_name}:\n")
                 out.write(f"  Hits: {len(scores)}\n")
                 if scores:
-                    out.write(f"  Score range : {min(scores):.2f} - {max(scores):.2f}\n")
-                    out.write(f"  Mean score  : {sum(scores)/len(scores):.2f}\n")
+                    out.write(
+                        f"  Score range : {min(scores):.2f} - {max(scores):.2f}\n"
+                    )
+                    out.write(f"  Mean score  : {sum(scores)/ len(scores):.2f}\n")
                     for threshold in [1.0, 2.0, 3.0, 4.0]:
                         count = sum(1 for s in scores if s <= threshold)
                         out.write(f"  <= {threshold:.1f}      : {count} hits\n")
@@ -264,8 +286,12 @@ rule summarise_hits:
 
             out.write(f"Total hits across all samples: {total_hits}\n")
             if all_scores:
-                out.write(f"Overall score range         : {min(all_scores):.2f} - {max(all_scores):.2f}\n")
-                out.write(f"Overall mean score          : {sum(all_scores)/len(all_scores):.2f}\n")
+                out.write(
+                    f"Overall score range         : {min(all_scores):.2f} - {max(all_scores):.2f}\n"
+                )
+                out.write(
+                    f"Overall mean score          : {sum(all_scores)/ len(all_scores):.2f}\n"
+                )
             out.write("\n")
             out.write("Interpretation guide:\n")
             out.write("  0 hits      : cutoff too strict, try 5.0\n")
@@ -277,10 +303,10 @@ rule summarise_hits:
 
 rule workflow_diagnostics:
     input:
-        tables = expand("results/tf/{sample}_targets.table", sample=TEST_SAMPLES),
-        logs   = expand("logs/targetfinder/{sample}.log", sample=TEST_SAMPLES),
+        tables=expand("results/tf/{sample}_targets.table", sample=TEST_SAMPLES),
+        logs=expand("logs/targetfinder/{sample}.log", sample=TEST_SAMPLES),
     output:
-        wf_diag = "results/tf/workflow_diagnostics.txt",
+        wf_diag="results/tf/workflow_diagnostics.txt",
     run:
         with open(output.wf_diag, "w") as out:
             out.write("=" * 70 + "\n")
