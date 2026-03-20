@@ -4,8 +4,8 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=8GB
 #SBATCH --time=02:00:00
-#SBATCH --job-name=tf_test
-#SBATCH --output=tf_test.log
+#SBATCH --job-name=tf
+#SBATCH --output=tf.log
 
 source /sw/local/rocky8/noarch/rcc/software/miniforge/24.11.3-0/etc/profile.d/conda.sh
 conda activate snakemake8
