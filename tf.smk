@@ -3,7 +3,7 @@
 targetfinder = "docker://quay.io/biocontainers/targetfinder:1.7--3"
 
 SCORE_CUTOFF = 4.0
-TARGET_DB    = "data/genome/JN3_transcript_clean.fa"
+TARGET_DB = "data/genome/JN3_transcript_clean.fa"
 
 TEST_SAMPLES = [
     "D1_top50",
@@ -22,38 +22,34 @@ TEST_SAMPLES = [
 ]
 
 
-
 rule target:
     input:
         expand(
-            "results/tf/{sample}_targets.{fmt}",
-            sample = TEST_SAMPLES,
-            fmt    = ["table", "gff", "json"],
+            "results/tf_deseq2/{sample}_targets.{fmt}",
+            sample=TEST_SAMPLES,
+            fmt=["table", "gff", "json"],
         ),
-        "results/tf/hit_summary.txt",
+        "results/tf_deseq2/hit_summary.txt",
 
 
 rule targetfinder:
     input:
-        srna_fa = "data/shortstack_seq/individual/{sample}.fasta",
-        db      = TARGET_DB,
+        srna_fa="data/deseq2_seq/individual/{sample}.fasta",
+        db=TARGET_DB,
     output:
-        table = "results/tf/{sample}_targets.table",
-        gff   = "results/tf/{sample}_targets.gff",
-        json  = "results/tf/{sample}_targets.json",
-    params:
-        score = SCORE_CUTOFF,
-    threads: 1
-    resources:
-        mem_mb  = 32000,
-        runtime = 240,
+        table="results/tf_deseq2/{sample}_targets.table",
+        gff="results/tf_deseq2/{sample}_targets.gff",
+        json="results/tf_deseq2/{sample}_targets.json",
     container:
         targetfinder
+    threads: 1
+    resources:
+        mem_mb=32000,
+        runtime=240,
+    params:
+        score=SCORE_CUTOFF,
     shell:
         """
-        mkdir -p results/tf
-
-        # Process each sRNA in the input FASTA
         SRNA_NAME=""
         SRNA_SEQ=""
 
@@ -68,7 +64,7 @@ rule targetfinder:
                             -c {params.score} \
                             -p $FMT \
                             -t 1 -r \
-                            >> results/tf/{wildcards.sample}_targets.$FMT
+                            >> results/tf_deseq2/{wildcards.sample}_targets.$FMT
                     done
                 fi
                 SRNA_NAME="${{line:1}}"
@@ -88,7 +84,7 @@ rule targetfinder:
                     -c {params.score} \
                     -p $FMT \
                     -t 1 -r \
-                    >> results/tf/{wildcards.sample}_targets.$FMT
+                    >> results/tf_deseq2/{wildcards.sample}_targets.$FMT
             done
         fi
         """
@@ -96,9 +92,9 @@ rule targetfinder:
 
 rule summarise_hits:
     input:
-        tables = expand("results/tf/{sample}_targets.table", sample = TEST_SAMPLES),
+        tables=expand("results/tf_deseq2/{sample}_targets.table", sample=TEST_SAMPLES),
     output:
-        summary = "results/tf/hit_summary.txt",
+        summary="results/tf_deseq2/hit_summary.txt",
     run:
         sample_results = {}
 
@@ -127,14 +123,18 @@ rule summarise_hits:
             for sample_name, scores in sample_results.items():
                 hits = len(scores)
                 if scores:
-                    out.write(f"{sample_name}: {hits} hits  (scores {min(scores):.1f} – {max(scores):.1f})\n")
+                    out.write(
+                        f"{sample_name}: {hits} hits  (scores {min(scores):.1f} – {max(scores):.1f})\n"
+                    )
                 else:
                     out.write(f"{sample_name}: 0 hits\n")
 
             out.write(f"\nTotal hits          : {total_hits}\n")
-            out.write(f"Average per sample  : {total_hits / len(TEST_SAMPLES):.1f}\n")
+            out.write(
+                f"Average per sample  : {total_hits/ len(TEST_SAMPLES):.1f}\n"
+            )
 
-            no_hits  = sum(1 for s in sample_results.values() if len(s) == 0)
+            no_hits = sum(1 for s in sample_results.values() if len(s) == 0)
             few_hits = sum(1 for s in sample_results.values() if 1 <= len(s) <= 10)
             many_hits = sum(1 for s in sample_results.values() if len(s) > 10)
 
