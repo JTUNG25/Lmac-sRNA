@@ -15,7 +15,7 @@ wt_samples = [
     "D5-7-3",
 ]
 
-(all_samples,) = glob_wildcards("raw_data_srna/links/{sample}_R1.fastq.gz")
+(all_samples,) = glob_wildcards("raw_data_srna_2/merged/{sample}_R1.fastq.gz")
 all_samples = [s for s in all_samples if not s.startswith("RNA")]
 
 
@@ -26,7 +26,7 @@ rule target:
 
 rule shortstack_locifile:
     input:
-        reads="data/merged_srna/{sample}.merged.fastq.gz",
+        reads="data/fastp_srna/{sample}.merged.fastq.gz",
         loci="results/shortstack/wt/Results.txt",
         genome="data/genome/JN3.fasta",
     output:
@@ -51,7 +51,7 @@ rule shortstack_locifile:
 
 rule shortstack_pooled:
     input:
-        reads=expand("data/merged_srna/{sample}.merged.fastq.gz", sample=wt_samples),
+        reads=expand("data/fastp_srna/{sample}.merged.fastq.gz", sample=wt_samples),
         genome="data/genome/JN3.fasta",
     output:
         "results/shortstack/wt/Results.txt",
@@ -75,12 +75,12 @@ rule shortstack_pooled:
 
 rule fastp:
     input:
-        r1="raw_data_srna/links/{sample}_R1.fastq.gz",
-        r2="raw_data_srna/links/{sample}_R2.fastq.gz",
+        r1="raw_data_srna_2/merged/{sample}_R1.fastq.gz",
+        r2="raw_data_srna_2/merged/{sample}_R2.fastq.gz",
     output:
-        fastq_gz="data/merged_srna/{sample}.merged.fastq.gz",
-        html="data/merged_srna/{sample}_fastp.html",
-        json="data/merged_srna/{sample}_fastp.json",
+        fastq_gz="data/fastp_srna/{sample}.merged.fastq.gz",
+        html="data/fastp_srna/{sample}_fastp.html",
+        json="data/fastp_srna/{sample}_fastp.json",
     threads: 8
     resources:
         mem_mb=32000,
