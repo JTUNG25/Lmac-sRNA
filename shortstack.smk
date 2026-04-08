@@ -58,7 +58,7 @@ rule shortstack_pooled:
     threads: 16
     resources:
         mem_mb=32000,
-        runtime=60,
+        runtime=120,
     container:
         shortstack
     shell:

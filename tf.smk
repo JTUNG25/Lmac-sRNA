@@ -25,21 +25,21 @@ TEST_SAMPLES = [
 rule target:
     input:
         expand(
-            "results/tf_deseq2/{sample}_targets.{fmt}",
+            "results/tf_edger/{sample}_targets.{fmt}",
             sample=TEST_SAMPLES,
             fmt=["table", "gff", "json"],
         ),
-        "results/tf_deseq2/hit_summary.txt",
+        "results/tf_edger/hit_summary.txt",
 
 
 rule targetfinder:
     input:
-        srna_fa="data/deseq2_seq/individual/{sample}.fasta",
+        srna_fa="data/edger_seq/individual/{sample}.fasta",
         db=TARGET_DB,
     output:
-        table="results/tf_deseq2/{sample}_targets.table",
-        gff="results/tf_deseq2/{sample}_targets.gff",
-        json="results/tf_deseq2/{sample}_targets.json",
+        table="results/tf_edger/{sample}_targets.table",
+        gff="results/tf_edger/{sample}_targets.gff",
+        json="results/tf_edger/{sample}_targets.json",
     container:
         targetfinder
     threads: 1
@@ -64,7 +64,7 @@ rule targetfinder:
                             -c {params.score} \
                             -p $FMT \
                             -t 1 -r \
-                            >> results/tf_deseq2/{wildcards.sample}_targets.$FMT
+                            >> results/tf_edger/{wildcards.sample}_targets.$FMT
                     done
                 fi
                 SRNA_NAME="${{line:1}}"
@@ -84,7 +84,7 @@ rule targetfinder:
                     -c {params.score} \
                     -p $FMT \
                     -t 1 -r \
-                    >> results/tf_deseq2/{wildcards.sample}_targets.$FMT
+                    >> results/tf_edger/{wildcards.sample}_targets.$FMT
             done
         fi
         """
@@ -92,9 +92,9 @@ rule targetfinder:
 
 rule summarise_hits:
     input:
-        tables=expand("results/tf_deseq2/{sample}_targets.table", sample=TEST_SAMPLES),
+        tables=expand("results/tf_edger/{sample}_targets.table", sample=TEST_SAMPLES),
     output:
-        summary="results/tf_deseq2/hit_summary.txt",
+        summary="results/tf_edger/hit_summary.txt",
     run:
         sample_results = {}
 
