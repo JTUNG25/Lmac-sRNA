@@ -4,15 +4,9 @@ fastp = "docker://quay.io/biocontainers/fastp:1.0.1--heae3180_0"
 shortstack = "docker://quay.io/biocontainers/shortstack:4.1.2--hdfd78af_0"
 
 wt_samples = [
-    "D5-5-1",
-    "D5-5-2",
-    "D5-5-3",
-    "D5-6-1",
-    "D5-6-2",
-    "D5-6-3",
-    "D5-7-1",
-    "D5-7-2",
-    "D5-7-3",
+    "WT-1-1",
+    "WT-1-2",
+    "WT-1-3",
 ]
 
 (all_samples,) = glob_wildcards("raw_data_srna_2/merged/{sample}_R1.fastq.gz")
