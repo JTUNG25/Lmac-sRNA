@@ -6,19 +6,12 @@ SCORE_CUTOFF = 4.0
 TARGET_DB = "data/genome/JN3_transcript_clean.fa"
 
 TEST_SAMPLES = [
-    "D1_top50",
-    "D2-2_top50",
-    "D2-3_top50",
-    "D2-4_top50",
-    "A1-1_top50",
-    "A1-2_top50",
-    "A1-3_top50",
-    "A3_top50",
-    "R1_top50",
-    "R2-2_top50",
-    "R2-3_top50",
-    "R2-4_top50",
-    "R2-5_top50",
+    "A13-1_top50",
+    "A13-2_top50",
+    "A13-1_top50",
+    "R12-1_top50",
+    "R12-2_top50",
+    "R12-3_top50",
 ]
 
 
