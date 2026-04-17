@@ -4,7 +4,7 @@ fastp      = "docker://quay.io/biocontainers/fastp:1.0.1--heae3180_0"
 shortstack = "docker://quay.io/biocontainers/shortstack:4.1.2--hdfd78af_0"
 
 
-(all_samples,) = glob_wildcards("raw_data_srna_2/merged/{sample}_R1.fastq.gz")
+(all_samples,) = glob_wildcards("merged_srna/{sample}_R1.fastq.gz")
 
 # WT controls are included so novel clusters are always called in context of the WT baseline 
 
