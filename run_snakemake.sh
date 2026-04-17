@@ -13,4 +13,4 @@ cd /QRISdata/Q9140/lmac/lmac_srna
 export TMPDIR=/QRISdata/Q9140/lmac/lmac_srna/tmp
 mkdir -p $TMPDIR
 chmod +x profiles/bunya/status-sacct-robust.sh
-snakemake -s shortstack.smk --profile profiles/bunya/
+snakemake -s shortstack_novel.smk --profile profiles/bunya/
