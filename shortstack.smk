@@ -5,7 +5,7 @@ shell.prefix("set -euo pipefail; ")
 
 fastp = "docker://quay.io/biocontainers/fastp:1.0.1--heae3180_0"
 shortstack = "docker://quay.io/biocontainers/shortstack:4.1.2--hdfd78af_0"
-bowtie = "docker://quay.io/biocontainers/bowtie:1.3.1--py310h4070885_6"
+bowtie = "docker://quay.io/biocontainers/bowtie:1.3.1--py312hf8dbd9f_10"
 
 TRANSCRIPT_FASTA = "data/genome/JN3_transcript_clean.fa"
 
