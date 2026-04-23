@@ -39,7 +39,7 @@ rule target:
 
 rule targetfinder:
     input:
-        srna_fa="data/dKO/edger_seq/individual/{sample}.fasta",
+        srna_fa="data/all/edger_seq/{sample}.fasta",
         db=TARGET_DB,
     output:
         table="results/tf_edger/{sample}_targets.table",
