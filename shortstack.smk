@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+shell.executable("/bin/bash")
+shell.prefix("set -euo pipefail; ")
+
 fastp = "docker://quay.io/biocontainers/fastp:1.0.1--heae3180_0"
 shortstack = "docker://quay.io/biocontainers/shortstack:4.1.2--hdfd78af_0"
-samtools = "docker://quay.io/biocontainers/samtools:1.19.2--h50ea8bc_0"
 bowtie = "docker://quay.io/biocontainers/bowtie:1.3.1--py310h4070885_6"
 
 TRANSCRIPT_FASTA = "data/genome/JN3_transcript_clean.fa"
@@ -140,7 +142,7 @@ rule bowtie_map:
                -a --best --strata \
                --sam \
                2> {output.stats} \
-        | awk '$2 != 4' \
+        | awk '$1 !~ /^@/ && $2 != 4' \
         | tee \
             >(awk '{{if(length($10)==21) print $3}}' | sort | uniq -c | awk '{{print $2"\t"$1}}' > {output.counts_21}) \
             >(awk '{{if(length($10)==22) print $3}}' | sort | uniq -c | awk '{{print $2"\t"$1}}' > {output.counts_22}) \
@@ -164,6 +166,8 @@ rule merge_counts:
         total="results/transcript_counts/all_samples_counts.tsv",
         nt21="results/transcript_counts/all_samples_21nt.tsv",
         nt22="results/transcript_counts/all_samples_22nt.tsv",
+    params:
+        samples=all_samples,
     run:
         import pandas as pd
 
@@ -178,9 +182,9 @@ rule merge_counts:
             merged.index.name = "transcript"
             return merged
 
-        merge_counts(input.total, all_samples).to_csv(output.total, sep="\t")
-        merge_counts(input.nt21, all_samples).to_csv(output.nt21, sep="\t")
-        merge_counts(input.nt22, all_samples).to_csv(output.nt22, sep="\t")
+        merge_counts(input.total, params.samples).to_csv(output.total, sep="\t")
+        merge_counts(input.nt21, params.samples).to_csv(output.nt21, sep="\t")
+        merge_counts(input.nt22, params.samples).to_csv(output.nt22, sep="\t")
 
 
 rule fastp:
