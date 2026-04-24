@@ -136,8 +136,9 @@ rule bowtie_map:
     shell:
         """
         set +o pipefail
+
         bowtie -x data/genome/JN3_transcripts \
-               -U {input.reads} \
+               {input.reads} \
                -p {threads} \
                --no-unal \
                -a --best --strata \
