@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 shell.executable("/bin/bash")
-shell.prefix("set -euo pipefail; ")
 
 fastp = "docker://quay.io/biocontainers/fastp:1.0.1--heae3180_0"
 shortstack = "docker://quay.io/biocontainers/shortstack:4.1.2--hdfd78af_0"
@@ -127,6 +126,7 @@ rule bowtie_map:
         counts_21="results/transcript_counts/{sample}.21nt.counts.txt",
         counts_22="results/transcript_counts/{sample}.22nt.counts.txt",
         stats="results/transcript_counts/{sample}.stats.txt",
+        sam=temp("results/transcript_counts/{sample}.tmp.sam"),
     container:
         bowtie
     threads: 8
@@ -135,6 +135,7 @@ rule bowtie_map:
         runtime=60,
     shell:
         """
+        set +o pipefail
         bowtie -x data/genome/JN3_transcripts \
                -U {input.reads} \
                -p {threads} \
@@ -142,12 +143,22 @@ rule bowtie_map:
                -a --best --strata \
                --sam \
                2> {output.stats} \
-        | awk '$1 !~ /^@/ && $2 != 4' \
-        | tee \
-            >(awk '{{if(length($10)==21) print $3}}' | sort | uniq -c | awk '{{print $2"\t"$1}}' > {output.counts_21}) \
-            >(awk '{{if(length($10)==22) print $3}}' | sort | uniq -c | awk '{{print $2"\t"$1}}' > {output.counts_22}) \
-        | awk '{{print $3}}' | sort | uniq -c | awk '{{print $2"\t"$1}}' \
-        > {output.counts_total}
+        > {output.sam}
+
+        awk '$1 !~ /^@/ && $2 != 4 {{print $3}}' {output.sam} \
+            | sort | uniq -c \
+            | awk '{{print $2"\t"$1}}' \
+            > {output.counts_total}
+
+        awk '$1 !~ /^@/ && $2 != 4 && length($10)==21 {{print $3}}' {output.sam} \
+            | sort | uniq -c \
+            | awk '{{print $2"\t"$1}}' \
+            > {output.counts_21}
+
+        awk '$1 !~ /^@/ && $2 != 4 && length($10)==22 {{print $3}}' {output.sam} \
+            | sort | uniq -c \
+            | awk '{{print $2"\t"$1}}' \
+            > {output.counts_22}
         """
 
 
