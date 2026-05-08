@@ -9,7 +9,7 @@
 FASTA36_DIR     = "/QRISdata/Q9140/lmac/lmac_srna/fasta36"
 SSEARCH36       = f"{FASTA36_DIR}/bin/ssearch36"
 MIRNATARGET_DIR = "/QRISdata/Q9140/lmac/lmac_srna/MiRNATarget"
-
+CONDA_ACTIVATE = "source /sw/local/rocky8/noarch/rcc/software/miniforge/24.11.3-0/etc/profile.d/conda.sh && conda activate snakemake8"
 
 # --- Parameters ---------------------------------------------------------------
 E_CUTOFF        = 4.0   # Max penalty score — 4.0 matches TargetFinder for comparison
@@ -74,6 +74,7 @@ rule revcomp_srna:
         rc_fa = temp("results/mirnatarget/{sample}_rc.fasta"),
     shell:
         """
+        {CONDA_ACTIVATE}
         seqkit seq --reverse --complement --rna2dna {input.srna_fa} \
             > {output.rc_fa}
         """
@@ -103,6 +104,7 @@ rule ssearch_align:
         runtime = 120,
     shell:
         """
+        {CONDA_ACTIVATE}
         {SSEARCH36} \
             -f -8 -g -3 \
             -E 10000 \
@@ -143,6 +145,7 @@ rule mirnatarget_parse:
         align_length    = ALIGN_LENGTH,
     shell:
         """
+        {CONDA_ACTIVATE}
         python3 {params.parse_ssearch} -i {input.ssearch_out} \
             | python3 {params.parse_targets} \
                 --E_cutoff                 {params.e_cutoff}        \
