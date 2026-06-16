@@ -3,7 +3,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=16G
-#SBATCH --time=01:00:00
+#SBATCH --time=04:00:00
 #SBATCH --output=logs/srna_comp_%j.log
 
 source ~/.bashrc
@@ -61,7 +61,7 @@ for f in "$INDIR"/*.merged.fastq.gz; do
     }'
 
     # --- positional nucleotide ---
-    seqkit seq -m 18 -M 26 -j 8 "$f" 2>/dev/null | \
+    seqkit seq -m 18 -M 21 -j 8 "$f" 2>/dev/null | \
     seqkit fx2tab -l -Q --only-id 2>/dev/null | \
     awk -v s="$sample" \
         -v pos_out="$OUTDIR/srna_pos_nuc.csv" '
